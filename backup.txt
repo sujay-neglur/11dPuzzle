@@ -1,0 +1,414 @@
+import java.lang.reflect.Array;
+import java.util.*;
+
+class Node{
+    int [] board;
+    Node parent;
+    Node(int [] child){
+        this.board=child;
+    }
+}
+
+public class DepthFirstSearch {
+
+    enum Moves {
+        LEFT, RIGHT, UP, DOWN, UPLEFT, UPRIGHT,DOWNLEFT, DOWNRIGHT
+    }
+
+    public void print(int [] board){
+        for(Integer i:board){
+            System.out.print(i+" ");
+        }
+        System.out.println();
+    }
+
+    public boolean checkGoalState(Node node){
+        if(node!=null){
+            int [] currentBoard= node.board;
+            for(int i=0;i<currentBoard.length-2;i++){
+                if(currentBoard[i]>currentBoard[i+1]){
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public int[] swapElements(int [] board, int blankIndex, int targetIndex){
+//        System.out.println("Blank index "+blankIndex+" Target index "+targetIndex);
+        int temp= board[blankIndex];
+        board[blankIndex]=board[targetIndex];
+        board[targetIndex]=temp;
+        return board;
+    }
+
+    public int getBlankIndex(int []board){
+        for(int i: board){
+            if(board[i]==0){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public boolean isVisited(ArrayList<Node> visited, int [] currentBoardPosition){
+        for(Node n: visited){
+            if(Arrays.equals(n.board,currentBoardPosition)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Node move(Node node, ArrayList<Node> visited, Moves move ){
+        if(node!=null){
+            int [] currentBoardPosition= Arrays.copyOf(node.board,node.board.length);
+            int blankIndex= getBlankIndex(currentBoardPosition);
+            int column= blankIndex%4;
+            int row= blankIndex/4;
+            if(move== Moves.LEFT){
+                if(column!=0){
+                    int [] leftMovedBoard= swapElements(currentBoardPosition,blankIndex,blankIndex-1);
+//                    System.out.println("Left moved board");
+//                    print(leftMovedBoard);
+                    if(!isVisited(visited,currentBoardPosition)){
+                        return new Node(leftMovedBoard);
+                    }
+                }
+                else{
+                    return null;
+                }
+
+                return null;
+            }
+
+            if(move==Moves.RIGHT){
+                if(column!=3){
+                    int [] rightMovedBoard= swapElements(currentBoardPosition,blankIndex,blankIndex+1);
+//                    System.out.println("Right moved board");
+//                    print(rightMovedBoard);
+                    if(!isVisited(visited,currentBoardPosition)){
+                        return new Node(rightMovedBoard);
+                    }
+                }
+                else{
+                    return null;
+                }
+
+                return null;
+            }
+
+            if(move==Moves.UP){
+                if(row!=0){
+                    int [] upMovedBoard= swapElements(currentBoardPosition,blankIndex,blankIndex-4);
+//                    System.out.println("Up moved board");
+//                    print(upMovedBoard);
+                    if(!isVisited(visited,currentBoardPosition)){
+                        return new Node(upMovedBoard);
+                    }
+                }
+                else{
+                    return null;
+                }
+
+                return null;
+            }
+
+            if(move==Moves.DOWN){
+                if(row!=2){
+                    int [] downMovedBoard= swapElements(currentBoardPosition,blankIndex,blankIndex+4);
+//                    System.out.println("Down moved board");
+//                    print(downMovedBoard);
+                    if(!isVisited(visited,currentBoardPosition)){
+                        return new Node(downMovedBoard);
+                    }
+                }
+                else{
+                    return null;
+                }
+
+                return null;
+            }
+
+            if(move==Moves.UPLEFT){
+                if(column!=0 && row!=0){
+                    int [] upLeftMovedBoard= swapElements(currentBoardPosition,blankIndex,blankIndex-5);
+//                    System.out.println("Up left moved board");
+//                    print(upLeftMovedBoard);
+                    if(!isVisited(visited,currentBoardPosition)){
+                        return new Node(upLeftMovedBoard);
+                    }
+                }
+                else {
+                    return null;
+                }
+                return null;
+            }
+
+            if(move==Moves.UPRIGHT){
+                if(row!=0 && column!=3){
+                    int [] upRightMovedBoard= swapElements(currentBoardPosition,blankIndex,blankIndex-3);
+//                    System.out.println("Up right moved board");
+//                    print(upRightMovedBoard);
+                    if(!isVisited(visited,currentBoardPosition)){
+                        return new Node(upRightMovedBoard);
+                    }
+                }
+                else {
+                    return null;
+                }
+            }
+
+            if(move==Moves.DOWNLEFT){
+                if(row!=2 && column!=0){
+                    int [] downLeftMovedBoard= swapElements(currentBoardPosition,blankIndex,blankIndex+3);
+//                    System.out.println("Down left moved board");
+//                    print(downLeftMovedBoard);
+                    if(!isVisited(visited,currentBoardPosition)){
+                        return new Node(downLeftMovedBoard);
+                    }
+                }
+                else{
+                    return null;
+                }
+            }
+            if(move==Moves.DOWNRIGHT){
+                if(row!=2 && column!=3){
+                    int [] downRightMovedBoard= swapElements(currentBoardPosition,blankIndex,blankIndex+5);
+//                    System.out.println("Down right moved board");
+//                    print(downRightMovedBoard);
+                    if(!isVisited(visited,currentBoardPosition)){
+                        return new Node(downRightMovedBoard);
+                    }
+                }
+                else{
+                    return null;
+                }
+                return null;
+            }
+            return null;
+        }
+        return null;
+
+    }
+
+
+    public void dfs(int [] board){
+        System.out.println("Initial Board");
+        print(board);
+        Node initialInput= new Node(board);
+        ArrayList<Node> visited= new ArrayList<>();
+        Stack<Node> stack= new Stack<>();
+        stack.push(initialInput);
+        while (!stack.isEmpty()){
+            Node temp= stack.peek();
+//            stack.pop();
+            if(checkGoalState(temp)){
+                print(temp.board);
+                return;
+            }
+            visited.add(temp);
+            Node leftShiftedNode= move(temp,visited,Moves.LEFT);
+            if(leftShiftedNode!=null){
+                stack.push(leftShiftedNode);
+//                visited.add(leftShiftedNode);
+            }
+            else{
+                Node rightShiftedNode= move(temp,visited,Moves.RIGHT);
+                if(rightShiftedNode!=null){
+                    stack.push(rightShiftedNode);
+//                    visited.add(rightShiftedNode);
+                }
+                else{
+                    Node upShiftedNode= move(temp,visited,Moves.UP);
+                    if(upShiftedNode!=null){
+                        stack.push(upShiftedNode);
+//                        visited.add(upShiftedNode);
+                    }
+                    else{
+                        Node downShiftedNode= move(temp,visited,Moves.DOWN);
+                        if(downShiftedNode!=null){
+                            stack.push(downShiftedNode);
+//                            visited.add(downShiftedNode);
+                        }
+                        else{
+                            Node upLeftShiftedNode= move(temp,visited,Moves.UPLEFT);
+                            if(upLeftShiftedNode!=null){
+                                stack.push(upShiftedNode);
+//                                visited.add(upLeftShiftedNode);
+                            }
+                            else{
+                                Node upRightShiftedNode= move(temp,visited,Moves.UPRIGHT);
+                                if(upRightShiftedNode!=null){
+                                    stack.push(upRightShiftedNode);
+//                                    visited.add(upRightShiftedNode);
+                                }
+                                else{
+                                    Node downLeftShiftedNode= move(temp,visited,Moves.DOWNLEFT);
+                                    if(downLeftShiftedNode!=null){
+                                        stack.push(downShiftedNode);
+//                                        visited.add(downLeftShiftedNode);
+                                    }
+                                    else{
+                                        Node downRightShiftedNode= move(temp,visited,Moves.DOWNRIGHT);
+                                        if(downRightShiftedNode!=null){
+                                            stack.push(downRightShiftedNode);
+//                                            visited.add(downRightShiftedNode);
+                                        }
+                                        else{
+//                                            Node n=stack.pop();
+//                                            print(n.board);
+                                            stack.pop();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc= new Scanner(System.in);
+        int board[]= new int[12];
+        int i=0;
+        while(i<12){
+            board[i]=sc.nextInt();
+            i++;
+        }
+        DepthFirstSearch depthFirstSearch= new DepthFirstSearch();
+        depthFirstSearch.dfs(board);
+
+//        System.out.println(depthFirstSearch.checkGoalState(new Node(new int[]{1,2,3,4,5,6,7,8,9,10,11,0})));
+    }
+}
+
+
+1
+2
+4
+3
+5
+0
+8
+7
+10
+11
+6
+9
+
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+0
+11
+
+1
+2
+6
+4
+5
+9
+7
+3
+0
+10
+11
+8
+
+
+1 0 3 7 5 2 6 4 9 10 11 8
+
+
+2 11 4 0 1 6 3 8 5 9 10 7
+2 8 11 0 1 4 7 3 5 6 9 10
+if (node == null) {
+//            System.out.println("Node null found");
+            return;
+        }
+        if(checkGoalState(node)){
+            return;
+        }
+        Node upShiftNode = move(node, visited, Moves.UP);
+        if (upShiftNode != null) {
+            visited.add(upShiftNode);
+        }
+        dfs(upShiftNode,visited);
+
+        Node upRightShiftNode = move(node, visited, Moves.UPRIGHT);
+        if (upRightShiftNode != null) {
+            visited.add(upRightShiftNode);
+        }
+        dfs(upRightShiftNode,visited);
+
+        Node rightShiftNode = move(node, visited, Moves.RIGHT);
+        if (rightShiftNode != null) {
+            visited.add(rightShiftNode);
+        }
+        dfs(rightShiftNode,visited);
+
+        Node downRightShiftNode = move(node, visited, Moves.DOWNRIGHT);
+        if (downRightShiftNode != null) {
+            visited.add(downRightShiftNode);
+        }
+        dfs(downRightShiftNode,visited);
+
+        Node downShiftNode = move(node, visited, Moves.DOWN);
+        if (downShiftNode != null) {
+            visited.add(downShiftNode);
+        }
+        dfs(downShiftNode,visited);
+
+        Node downLeftShiftNode = move(node, visited, Moves.DOWNLEFT);
+        if (downLeftShiftNode != null) {
+            visited.add(downLeftShiftNode);
+        }
+        dfs(downLeftShiftNode,visited);
+
+        Node leftShiftNode = move(node, visited, Moves.LEFT);
+        if (leftShiftNode != null) {
+            visited.add(leftShiftNode);
+        }
+        dfs(leftShiftNode,visited);
+
+        Node upLeftShiftNode = move(node, visited, Moves.UPLEFT);
+        if (upLeftShiftNode != null) {
+            visited.add(upLeftShiftNode);
+        }
+        dfs(upLeftShiftNode,visited);
+
+        System.out.println("Done");
+
+
+
+
+        Up
+        1 11 8 0 5 3 4 7 9 2 10 6
+        Left
+        1 11 0 8 5 3 4 7 9 2 10 6
+        Down right
+        1 11 7 8 5 3 4 0 9 2 10 6
+        Up
+        1 11 7 0 5 3 4 8 9 2 10 6
+        Down left
+        1 11 7 4 5 3 0 8 9 2 10 6
+        Down left
+        1 11 7 4 5 3 0 8 9 2 10 6
+        Down left
+        1 11 7 4 5 3 0 8 9 2 10 6
+        Down left
+        1 11 7 4 5 3 0 8 9 2 10 6
+        Down left
+        1 11 7 4 5 3 0 8 9 2 10 6
