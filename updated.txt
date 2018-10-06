@@ -257,3 +257,112 @@ public class DepthFirstSearch {
 //        System.out.println(depthFirstSearch.checkGoalState(new Node(new int[]{1,2,3,4,5,6,7,8,9,10,11,0})));
     }
 }
+
+
+Manhattan distance with diagonal
+int distance = 0;
+//        for (int i = 0; i < board.length; i++) {
+//            if (board[i] == 0) continue;
+//            int indexInGoal = Utility.getIndex(BoardConfig.goal, board[i]);
+//            int targetRow = indexInGoal / BoardConfig.columns;
+//            int targetColumn = indexInGoal % BoardConfig.columns;
+//            int currentRow = i / BoardConfig.columns;
+//            int currentColumn = i % BoardConfig.columns;
+//            int traditionalDistance = 0;
+//            int diagonalDistance = 0;
+//            while (targetRow != currentRow && targetColumn != currentColumn) {
+//                if (targetRow < currentRow && targetColumn < currentColumn) {
+//                    currentRow--;
+//                    currentColumn--;
+//                    diagonalDistance++;
+//                    continue;
+//                }
+//
+//                if (targetRow < currentRow && targetColumn > currentColumn) {
+//                    currentRow--;
+//                    currentColumn++;
+//                    diagonalDistance++;
+//                    continue;
+//                }
+//
+//                if (targetRow > currentRow && targetColumn < currentColumn) {
+//                    currentRow++;
+//                    currentColumn--;
+//                    diagonalDistance++;
+//                    continue;
+//                }
+//                if (targetRow > currentRow && targetColumn > currentColumn) {
+//                    currentRow++;
+//                    currentColumn++;
+//                    diagonalDistance++;
+//                    continue;
+//                }
+//            }
+//            diagonalDistance += calculateTraditionalDistance(targetRow, targetColumn, currentRow, currentColumn);
+//            distance += diagonalDistance;
+//        }
+//        return distance;
+
+Manhattan distance normal
+
+//        int currentRow;
+//        int currentColumn;
+//        int targetRow;
+//        int targetColumn;
+//        int distance=0;
+//        for(int i=0;i<board.length;i++){
+//            if(board[i]==0) continue;
+//            int indexInGoal= Utility.getIndex(BoardConfig.goal,board[i]);
+//            targetRow= indexInGoal/BoardConfig.columns;
+//            targetColumn=indexInGoal%BoardConfig.columns;
+//            currentRow=i/BoardConfig.columns;
+//            currentColumn=i%BoardConfig.columns;
+//            if((currentRow+1== targetRow && currentColumn+1==targetColumn)
+//                    || (currentRow+1 ==targetRow && currentColumn+1 ==targetColumn)
+//                    || (currentRow-1 ==targetRow && currentColumn+1==targetColumn)
+//                    || (currentRow-1 == targetRow && currentColumn-1 ==targetColumn)){
+//                distance++;
+//                continue;
+//            }
+//            distance+= Math.abs(targetColumn-currentColumn)+Math.abs(targetRow-currentRow);
+//        }
+//        return distance;
+
+Euclidean distance
+distance += Math.sqrt(Math.pow(targetRow - currentRow, 2) + Math.pow(targetColumn - currentColumn, 2));
+
+
+A star insertion logic
+
+Node alreadyExistingNode= getIndexOfNode(child,open);
+                    if(alreadyExistingNode!=null){ // check if node exists in open
+                           if(alreadyExistingNode.heuristic+alreadyExistingNode.depth > child.heuristic+child.depth){
+                               open.remove(alreadyExistingNode);
+                               open.add(child);
+//                               System.out.println("Queue updated");
+                           }
+                    }
+
+                    else{
+                        alreadyExistingNode= getIndexOfNode(child,closed);
+                        if(alreadyExistingNode!=null){ // check if node exists in closed
+                            if(alreadyExistingNode.heuristic+alreadyExistingNode.depth > child.heuristic+child.depth){
+                                open.add(child);
+                            }
+                        }
+
+                        else{
+                            open.add(child);
+                        }
+                    }
+                }
+if(!Utility.isVisited(open,child.board)){
+                        open.add(child);
+                    }
+                    else{
+                        Node index=getIndexOfNode(child,open);
+                        if(index.heuristic+index.depth > child.heuristic+child.depth){
+                            open.remove(index);
+                            open.add(child);
+                        }
+                    }

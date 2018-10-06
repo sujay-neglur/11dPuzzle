@@ -1,56 +1,42 @@
 import java.util.*;
 
-import static jdk.nashorn.internal.objects.Global.print;
-
 
 public class DepthFirstSearch {
 
+    public boolean isPresentInStack(Stack<Node> stack, Node node){
+        Stack<Node> nodeStack= (Stack<Node>) stack.clone();
+        while (!nodeStack.isEmpty()){
+            Node top=nodeStack.peek();
+            nodeStack.pop();
+            if(Arrays.equals(top.board,node.board)) return true;
+        }
+        return false;
+    }
 
-
-
-
-
-//    public void addChildToList(Node node, HashSet<Node> visited, ArrayList<Node> children, Moves move) {
-//        if (node != null) {
-////            visited.add(node);
-//            children.add(node);
-////            System.out.println(move);
-////            print(node.board);
-//        }
-//    }
-
-
-    public void dfs(int[] board) {
-        Node init = new Node(board, null, Movement.Moves.ROOT,0);
-        System.out.println("Here");
-        ArrayList<Node> visited = new ArrayList<>();
-        Stack<Node> stack = new Stack<>();
+    public void depthFirstSearch(int[] board) {
+        Node init= new Node(board,null, Movement.Moves.ROOT,0);
+        Stack<Node> stack= new Stack<>();
         stack.push(init);
-        boolean goal = false;
-        int count = 0;
-        while (!stack.isEmpty()) {
-            Node temp = stack.pop();
-            System.out.println(temp.move);
-            print(temp.board);
+        ArrayList<Node> visited= new ArrayList<>();
+        while (!stack.isEmpty()){
+            Node temp= stack.pop();
             visited.add(temp);
-            if (Utility.checkGoalState(temp)) {
+            Utility.printMatrix(temp.board,temp.move,temp.heuristic+temp.depth,temp.parent);
+            if(Utility.checkGoalState(temp)){
+                Utility.print(temp);
                 break;
             }
 
-            ArrayList<Node> children = Utility.generateChildren(temp, visited);
-            for (Node n : children) {
-                if (Utility.checkGoalState(n)) {
-                    return;
+            ArrayList<Node> children= Utility.generateChildren(temp,visited);
+            Collections.reverse(children);
+            for(Node child:children){
+                if(child==null) continue;
+
+                if(!Utility.isVisited(visited,child.board) &&  !isPresentInStack(stack,child)){
+                    stack.push(child);
                 }
             }
-            for (int i = children.size() - 1; i >= 0; i--) {
-                if (!Utility.isVisited(visited, children.get(i).board)) {
-                    stack.push(children.get(i));
-                }
-            }
-            System.out.println(++count);
         }
     }
-
 
 }

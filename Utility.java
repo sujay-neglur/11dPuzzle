@@ -4,6 +4,52 @@ import java.util.stream.IntStream;
 
 
 public class Utility implements Comparator<Node> {
+
+    public static final void printMatrix(int[] a, Movement.Moves direction, double hericticsValue, Node b)
+    {
+        System.out.println("-------------------------------------------------------------------------------");
+
+
+        if(b!=null){
+            System.out.println(b.move +" "+(b.heuristic+b.depth));
+            for(int i=0; i< b.board.length;i++)
+            {
+                if(i==4  || i==8)
+                {
+                    System.out.println();
+                }
+                if((b.board[i]+"").length()==2 )
+                {
+                    System.out.print(b.board[i]+" ");
+                }else
+                {
+                    System.out.print(b.board[i]+"  ");
+                }
+
+            }
+            System.out.println("\n");
+        }
+
+        System.out.println(direction +" "+hericticsValue);
+        for(int i=0; i< a.length;i++)
+        {
+            if(i==4  || i==8)
+            {
+                System.out.println();
+            }
+            if((a[i]+"").length()==2 )
+            {
+                System.out.print(a[i]+" ");
+            }else
+            {
+                System.out.print(a[i]+"  ");
+            }
+
+        }
+        System.out.println("\n");
+        System.out.println("-------------------------------------------------------------------------------");
+    }
+
     public static void print(Node node) {
 
         char characters [] []= new char[BoardConfig.rows][BoardConfig.columns];
@@ -54,8 +100,10 @@ public class Utility implements Comparator<Node> {
     }
 
     public static boolean checkGoalState(Node node) {
-        if (Arrays.equals(node.board, BoardConfig.goal)) {
-            return true;
+        if(node!=null){
+            if (Arrays.equals(node.board, BoardConfig.goal)) {
+                return true;
+            }
         }
         return false;
     }

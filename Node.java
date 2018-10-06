@@ -2,18 +2,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
-class Node implements Comparator<Node> {
+class Node implements Comparator<Node>, Comparable<Node> {
     int[] board;
     Node parent;
-    int heuristic;
+    double heuristic;
     Movement.Moves move;
-    int depth;
+    double depth;
 
     public Node() {
 
     }
 
-    Node(int[] child, Node parent, Movement.Moves move, int depth) {
+    Node(int[] child, Node parent, Movement.Moves move, double depth) {
         this.board = child;
         this.parent = parent;
         this.move = move;
@@ -22,6 +22,7 @@ class Node implements Comparator<Node> {
 
     @Override
     public int compare(Node node, Node t1) {
+
         if (node.heuristic > t1.heuristic) return 1;
 
         if (node.heuristic == t1.heuristic) {
@@ -46,4 +47,8 @@ class Node implements Comparator<Node> {
         }
     }
 
+    @Override
+    public int compareTo(Node node) {
+        return 0;
+    }
 }

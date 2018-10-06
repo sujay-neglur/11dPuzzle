@@ -1,34 +1,19 @@
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.zip.DeflaterInputStream;
 
 public class Heuristics {
+
+    enum HeuristicToUse {
+        MANHATTAN, SUMINVERSION, MISPLACEDTILES;
+    }
 
     public static int calculateTraditionalDistance(int targetRow, int targetColumn, int currentRow, int currentColumn) {
         return Math.abs(targetColumn - currentColumn) + Math.abs(targetRow - currentRow);
     }
 
-    public static int manhattanDistance(int[] board) {
-//        int currentRow;
-//        int currentColumn;
-//        int targetRow;
-//        int targetColumn;
-//        int distance=0;
-//        for(int i=0;i<board.length;i++){
-//            if(board[i]==0) continue;
-//            int indexInGoal= Utility.getIndex(BoardConfig.goal,board[i]);
-//            targetRow= indexInGoal/BoardConfig.columns;
-//            targetColumn=indexInGoal%BoardConfig.columns;
-//            currentRow=i/BoardConfig.columns;
-//            currentColumn=i%BoardConfig.columns;
-//            if((currentRow+1== targetRow && currentColumn+1==targetColumn)
-//                    || (currentRow+1 ==targetRow && currentColumn+1 ==targetColumn)
-//                    || (currentRow-1 ==targetRow && currentColumn+1==targetColumn)
-//                    || (currentRow-1 == targetRow && currentColumn-1 ==targetColumn)){
-//                distance++;
-//                continue;
-//            }
-//            distance+= Math.abs(targetColumn-currentColumn)+Math.abs(targetRow-currentRow);
-//        }
-//        return distance;
+
+    public static double manhattanDistance(int[] board) {
 
         int distance = 0;
         for (int i = 0; i < board.length; i++) {
@@ -38,38 +23,10 @@ public class Heuristics {
             int targetColumn = indexInGoal % BoardConfig.columns;
             int currentRow = i / BoardConfig.columns;
             int currentColumn = i % BoardConfig.columns;
-            int traditionalDistance = 0;
-            int diagonalDistance = 0;
-            while (targetRow != currentRow && targetColumn != currentColumn) {
-                if (targetRow < currentRow && targetColumn < currentColumn) {
-                    currentRow--;
-                    currentColumn--;
-                    diagonalDistance++;
-                    continue;
-                }
+            distance += Math.sqrt((Math.pow(targetRow - currentRow, 2) + Math.pow(targetColumn - currentColumn, 2)));
+//            distance += Math.max(Math.abs(currentRow - targetRow), Math.abs(currentColumn - targetColumn));
+//            distance+=calculateTraditionalDistance(targetRow,targetColumn,currentRow,currentColumn);
 
-                if (targetRow < currentRow && targetColumn > currentColumn) {
-                    currentRow--;
-                    currentColumn++;
-                    diagonalDistance++;
-                    continue;
-                }
-
-                if (targetRow > currentRow && targetColumn < currentColumn) {
-                    currentRow++;
-                    currentColumn--;
-                    diagonalDistance++;
-                    continue;
-                }
-                if (targetRow > currentRow && targetColumn > currentColumn) {
-                    currentRow++;
-                    currentColumn++;
-                    diagonalDistance++;
-                    continue;
-                }
-            }
-            diagonalDistance += calculateTraditionalDistance(targetRow, targetColumn, currentRow, currentColumn);
-            distance += diagonalDistance;
         }
         return distance;
     }
@@ -100,12 +57,81 @@ public class Heuristics {
         return sum;
     }
 
-    public static int findDepth(Node node) {
-        int depth = 0;
-        for (Node temp = node; temp != null; temp = temp.parent) {
-            depth++;
+    public static int misplacedTiles(int[] board) {
+        int count = 0;
+        for (int i = 0; i < board.length; i++) {
+            if (board[i] == 0) continue;
+            if (board[i] != BoardConfig.goal[i])
+                count++;
         }
-        return depth;
+        return count;
+    }
+
+    public static int linearConflict(int[] board) {
+        int conflict = 0;
+        for (int i = 0; i < board.length - 1; i++) {
+            if (board[i] == 0) continue;
+            for (int j = i + 1; j < board.length; j++) {
+                if (board[j] == 0) continue;
+
+                int currentRowOfI = Utility.getIndex(board, board[i]) / BoardConfig.columns;
+                int currentColumnOfI = Utility.getIndex(board, board[i]) % BoardConfig.columns;
+                int currentRowOfJ = Utility.getIndex(board, board[j]) / BoardConfig.columns;
+                int currentColumnOfJ = Utility.getIndex(board, board[j]) % BoardConfig.columns;
+                int targetRowOfI = Utility.getIndex(BoardConfig.goal, board[i]) / BoardConfig.columns;
+                int targetColumnOfI = Utility.getIndex(BoardConfig.goal, board[i]) % BoardConfig.columns;
+                int targetRowOfJ = Utility.getIndex(BoardConfig.goal, board[j]) / BoardConfig.columns;
+                int targetColumnOfJ = Utility.getIndex(BoardConfig.goal, board[j]) % BoardConfig.columns;
+
+                if (currentRowOfI == currentRowOfJ && targetRowOfI == targetRowOfJ) {
+                    if ((currentColumnOfI<currentColumnOfJ && targetColumnOfI>targetColumnOfJ) || (currentColumnOfI>currentColumnOfJ && targetColumnOfI<targetColumnOfJ)) {
+                        conflict++;
+//                    System.out.println(board[i]+" "+board[j]);
+                    }
+                }
+                if (currentColumnOfI == currentColumnOfJ && targetColumnOfI == targetColumnOfJ) {
+                    if((currentRowOfI <currentRowOfJ && targetRowOfI>targetRowOfJ) || (currentRowOfI>currentRowOfJ && targetRowOfI<targetRowOfJ)){
+                        conflict++;
+//                    System.out.println(board[i]+" "+board[j]);
+                    }
+                }
+            }
+        }
+        return conflict;
+    }
+
+    public static int fringeDatabase(int [] board){
+        int costOfTopLeft=0;
+        int costOfTheRest=0;
+        ArrayList<Integer> firstRow=  new ArrayList<>();
+        for(int i=0;i<BoardConfig.goal.length;i++){
+//            if(board[i]==0) continue;
+            if(i/BoardConfig.columns==0) {
+                firstRow.add(board[i]);
+                continue;
+            }
+            if(i%BoardConfig.columns==0){
+                firstRow.add(board[i]);
+            }
+        }
+        System.out.println(firstRow);
+
+        for(int i=0;i<firstRow.size();i++){
+            int currentRow=Utility.getIndex(board,firstRow.get(i))/BoardConfig.columns;
+            int currentColumn=Utility.getIndex(board,firstRow.get(i))%BoardConfig.columns;
+            int targetRow=Utility.getIndex(BoardConfig.goal,firstRow.get(i))/BoardConfig.columns;
+            int targetColumn=Utility.getIndex(BoardConfig.goal,firstRow.get(i))%BoardConfig.columns;
+            costOfTopLeft+=Math.sqrt(Math.pow(currentRow-targetRow,2)+ Math.pow(currentColumn-targetColumn,2));
+        }
+
+        for(int i=0;i<board.length;i++){
+            if(firstRow.contains(board[i])) continue;
+            int currentRow=Utility.getIndex(board,board[i])/BoardConfig.columns;
+            int currentColumn=Utility.getIndex(board,board[i])%BoardConfig.columns;
+            int targetRow=Utility.getIndex(BoardConfig.goal,board[i])/BoardConfig.columns;
+            int targetColumn=Utility.getIndex(BoardConfig.goal,board[i])%BoardConfig.columns;
+        }
+        return costOfTopLeft;
     }
 }
 

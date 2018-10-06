@@ -1,46 +1,65 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.*;
 
 public class AStar {
 
-    public void aStar(int[] board, BestFirstSearch.HeuristicToUse heuristicToUse) {
+    static Node getIndexOfNode(Node node, ArrayList<Node> open) {
+        ArrayList<Node> al = new ArrayList<>(open);
+        for (Node n : al) {
+            if (Arrays.equals(n.board, node.board)) {
+                return n;
+            }
+        }
+        return null;
+    }
+
+    public void aStar(int[] board, Heuristics.HeuristicToUse heuristicToUse) {
+        long start= System.nanoTime();
         ArrayList<Node> open = new ArrayList<>();
         ArrayList<Node> closed= new ArrayList<>();
-
         Node init= new Node(board,null, Movement.Moves.ROOT,0);
         open.add(init);
-
-        int count=0;
         while (!open.isEmpty()){
+            if(System.nanoTime()== start+40*Math.pow(10,9)) break;
             Node temp= open.remove(0);
-//            Utility.print(temp);
             closed.add(temp);
+            System.out.println(temp.heuristic+" "+temp.depth);
+            Utility.printMatrix(temp.board,temp.move,temp.heuristic+temp.depth,temp.parent);
             if(Utility.checkGoalState(temp)){
                 Utility.print(temp);
                 break;
             }
-            ArrayList<Node> children=Utility.generateChildren(temp,closed);
+            ArrayList<Node> children= Utility.generateChildren(temp,closed);
+            for(Node child:children){
+                if(child==null) continue;
 
-//            System.out.println(children);
-            for(Node n: children){
-                if(n!=null && !Utility.isVisited(closed,n.board) && !Utility.isVisited(open,n.board)){
-                    if(heuristicToUse== BestFirstSearch.HeuristicToUse.MANHATTAN)
-                        n.heuristic=Heuristics.manhattanDistance(n.board);
-                    else
-                        n.heuristic=Heuristics.sumInversion(n.board);
-                    if(!Utility.isVisited(closed,n.board) && !Utility.isVisited(open, n.board)){
-                        open.add(n);
+                if(Utility.isVisited(closed,child.board)) continue;
+
+                if(Arrays.equals(BoardConfig.goal,child.board))
+                {
+                    Utility.print(child);
+                    System.exit(0);
+                }
+                if(heuristicToUse== Heuristics.HeuristicToUse.MANHATTAN)
+                    child.heuristic=Heuristics.manhattanDistance(child.board)+Heuristics.linearConflict(child.board);
+                if(heuristicToUse== Heuristics.HeuristicToUse.SUMINVERSION)
+                    child.heuristic=Heuristics.sumInversion(child.board)+Heuristics.linearConflict(child.board);
+                if(heuristicToUse== Heuristics.HeuristicToUse.MISPLACEDTILES)
+                    child.heuristic=Heuristics.misplacedTiles(child.board)+Heuristics.linearConflict(child.board);
+                Node existingNode= getIndexOfNode(child,open); //node existing in the queue
+                if(existingNode!=null){
+                    if(existingNode.heuristic+existingNode.depth > child.heuristic+child.depth){
+                        open.remove(existingNode);
+                        open.add(child);
                     }
                 }
+                else{
+                    open.add(child);
+                }
             }
-            open= Utility.sortSet(open,new Utility());
-            count++;
+
+            open=Utility.sortSet(open,new Utility());
         }
-        System.out.println(count);
-
     }
-
-
 }
+
+
