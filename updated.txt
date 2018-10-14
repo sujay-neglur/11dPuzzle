@@ -366,3 +366,33 @@ if(!Utility.isVisited(open,child.board)){
                             open.add(child);
                         }
                     }
+
+
+Iterative deepening:
+public boolean iterativeDeepening(int previousDepth, int targetDepth, int [] board) {
+
+        Stack<Node> stack= new Stack<>();
+        ArrayList<Node> visited =new ArrayList<>();
+        Node root= new Node(board,null, Movement.Moves.ROOT,0);
+        stack.push(root);
+        while (!stack.isEmpty()){
+            Node temp =stack.pop();
+            visited.add(temp);
+
+            if(Utility.checkGoalState(temp)){
+                Utility.print(temp);
+                return true;
+            }
+
+            ArrayList<Node> children =Utility.generateChildren(temp,visited);
+            Collections.reverse(children);
+            for(Node child:children){
+                if(child==null) continue;
+
+                if(!Utility.isVisited(visited,child.board) && child.depth<=targetDepth && child.depth>=previousDepth && !isPresentInStack(stack,child)){
+                    stack.push(child);
+                }
+            }
+        }
+        return false;
+    }
